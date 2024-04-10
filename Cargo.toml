@@ -1,0 +1,41 @@
+[package]
+name = "cleaner"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+clap = { version = "4.5.3", features = ["derive", "unicode"] }
+env_logger = "0.11.3"
+fundu = "2.0.0"
+log = "0.4.21"
+trash = "4.1.0"
+
+[dev-dependencies]
+
+[package.metadata.bin]
+# These can be managed by cargo-run-bin
+# If using the nix flake, items listed here are installed into the env (not synced to version)
+cargo-binstall = { version = "1.6.4" }
+cargo-llvm-cov = { version = "0.6.6" }
+cargo-nextest = { version = "0.9.67" }
+cargo-tarpaulin = { version = "0.27.3" }
+convco = { version = "0.5.1" }
+
+[package.metadata.commands]
+tools = '''set -eu
+  cargo bin --install
+  cargo bin --sync-aliases
+'''
+nextest = '''set -e
+  cargo llvm-cov nextest
+  rm -f *.profraw
+'''
+coverage = '''set -e
+  cargo tarpaulin
+  rm -f *.profraw
+'''
+coverage-llvm = '''set -e
+  cargo tarpaulin --engine llvm
+  rm -f *.profraw
+'''

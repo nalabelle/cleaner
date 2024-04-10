@@ -1,0 +1,31 @@
+[devshell]
+name = "cleaner"
+packages = [
+  "rust-bin.stable.latest.default", #via rust-overlay
+
+  # For cargo-tarpaulin
+  "gcc13",
+  "openssl.dev",
+  "pkg-config",
+
+  # build
+  "earthly",
+]
+
+[devshell.interactive.cargo-setup]
+text = """
+  cargo bin --install
+  cargo bin --sync-aliases
+  """
+
+[[env]]
+name = "PROMPT_ENV"
+eval = "devshell:$(basename $PRJ_ROOT)"
+
+[[env]]
+name = "RUSTFLAGS"
+value = "-C instrument-coverage=all"
+
+[[env]]
+name = "PKG_CONFIG_PATH"
+eval = "$DEVSHELL_DIR/lib/pkgconfig"
