@@ -12,7 +12,7 @@ nix-flake:
   COPY Cargo.toml devshell.toml flake.* /tmp/build/
   WORKDIR /tmp/build
   RUN nix build '.#devShell'
-  SAVE IMAGE --cache-hint
+  SAVE IMAGE --push $REGISTRY/$PROJECT/nix-flake:latest
 
 # nix-deps imports the rust/Cargo.toml build dependencies
 nix-deps:
@@ -23,15 +23,16 @@ nix-deps:
   # Run an actual build on that trivial source file to compile the engine
   RUN nix develop --command cargo fetch
   RUN rm -rvf src
-  SAVE IMAGE --cache-hint
+  SAVE IMAGE --push $REGISTRY/$PROJECT/nix-deps:latest
 
 # test runs the build tests
 test:
   FROM +nix-deps
   COPY . ./
   RUN nix develop --command cargo-tarpaulin --engine llvm
+  SAVE IMAGE --push $REGISTRY/$PROJECT/test:latest
 
 build:
-  FROM +nix-deps
-  COPY . ./
-  RUN nix develop --command build
+  FROM +test
+  RUN nix develop --command cargo build -r
+  SAVE IMAGE --push $REGISTRY/$PROJECT/build:latest
