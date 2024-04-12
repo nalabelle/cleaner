@@ -16,11 +16,14 @@ trash = "4.1.0"
 [package.metadata.bin]
 # These can be managed by cargo-run-bin
 # If using the nix flake, items listed here are installed into the env (not synced to version)
-cargo-binstall = { version = "1.6.4" }
 cargo-llvm-cov = { version = "0.6.6" }
 cargo-nextest = { version = "0.9.67" }
 cargo-tarpaulin = { version = "0.27.3" }
 convco = { version = "0.5.1" }
+
+[profile.release]
+lto = true
+strip = true
 
 [package.metadata.commands]
 tools = '''set -eu
@@ -29,13 +32,10 @@ tools = '''set -eu
 '''
 nextest = '''set -e
   cargo llvm-cov nextest
-  rm -f *.profraw
 '''
 coverage = '''set -e
   cargo tarpaulin
-  rm -f *.profraw
 '''
 coverage-llvm = '''set -e
   cargo tarpaulin --engine llvm
-  rm -f *.profraw
 '''

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.10.3/.schema/devbox.schema.json",
+  "packages": [
+    "rustup@latest",
+    "github:NixOS/nixpkgs/nixos-unstable#cargo-binstall",
+    "github:NixOS/nixpkgs/nixos-unstable#toml-cli",
+    "earthly@latest",
+    "git@latest",
+    "jq@latest"
+  ],
+  "env": {
+    "PROMPT_ENV": "devbox:cleaner"
+  },
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null"
+    ],
+    "scripts": {
+      "test": [
+        "echo \"Error: no test specified\" && exit 1"
+      ]
+    }
+  }
+}

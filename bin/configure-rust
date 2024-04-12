@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu
+set -o pipefail
+set -x
+
+entries="$(toml get Cargo.toml 'package.metadata.bin' \
+  | jq -r 'to_entries | map(.key + "@" + .value.version) | @sh' )"
+eval "entries=($entries)"
+cargo-binstall --no-discover-github-token -y ${entries[@]}

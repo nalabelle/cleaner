@@ -5,7 +5,7 @@ use env_logger;
 use fundu::DurationParser;
 use fundu::TimeUnit::{Day, Hour, Minute};
 use log;
-use std::io::Result;
+use std::io::{Error, ErrorKind, Result};
 use std::time::{Duration, SystemTime};
 
 mod cleaner;
@@ -37,7 +37,7 @@ fn parse_time(time: String) -> Duration {
 }
 
 fn main() -> Result<()> {
-    env_logger::init();
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     log::trace!("Starting Cleaner...");
     let args = Args::parse();
 
@@ -52,6 +52,12 @@ fn main() -> Result<()> {
             conditions.push(condition);
         }
         None => {}
+    }
+    if conditions.len() < 1 {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "No conditions to check, please add some",
+        ));
     }
     let cleaner = cleaner::Cleaner::new(args.path, args.dry_run, conditions);
     cleaner.clean()?;

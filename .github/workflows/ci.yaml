@@ -24,5 +24,7 @@ jobs:
       contents: read
       packages: write
     with:
-      target: +test
+      target: +build
       cache: ghcr.io/nalabelle/cleaner:cache
+      release: true
+      release_name: cleaner

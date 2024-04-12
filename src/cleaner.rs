@@ -1,7 +1,7 @@
 use log;
 use std::fs;
 use std::io::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time;
 use trash;
 
@@ -11,7 +11,11 @@ pub trait CleanerCondition {
 }
 
 pub fn print_path(path: &PathBuf) -> String {
-    format!("{}", path.strip_prefix(".").unwrap().to_str().unwrap())
+    let formatted_path: &Path = match path.strip_prefix(".") {
+        Ok(p) => p,
+        Err(_) => path.as_path(),
+    };
+    format!("{}", formatted_path.to_str().unwrap())
 }
 
 pub struct LastModifiedIsOlderThan {
@@ -44,13 +48,13 @@ impl CleanerCondition for LastModifiedIsOlderThan {
 
     fn test(&self, path: PathBuf) -> bool {
         let modified = self.modified_duration(&path);
+        log::trace!(
+            "{}, File Time {:.0?} vs Comparison Time {:.0?}",
+            print_path(&path),
+            modified,
+            self.duration
+        );
         if modified > self.duration {
-            log::debug!(
-                "Would delete /{}, File Time {:.0?} vs Comparison Time {:.0?}",
-                print_path(&path),
-                modified,
-                self.duration
-            );
             return true;
         }
         false
@@ -84,8 +88,9 @@ impl Cleaner {
             let path = entry.path();
             for condition in conditions.iter() {
                 let result = condition.test(path.clone());
+                let postfix = if self.dry_run { " (dry run)" } else { "" };
                 if result {
-                    log::info!("Deleting {:?}", print_path(&path));
+                    log::warn!("Deleting {}{}", print_path(&path), postfix);
                     if !self.dry_run {
                         trash::delete(&path).unwrap();
                     }
