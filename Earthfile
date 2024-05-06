@@ -31,7 +31,8 @@ deps:
 test:
   FROM +deps
   COPY --dir src .
-  RUN devbox run cargo tarpaulin --engine llvm
+  RUN devbox run cargo test
+#  RUN devbox run cargo tarpaulin --engine llvm
 
 linux:
   FROM +deps
