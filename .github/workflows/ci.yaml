@@ -1,0 +1,25 @@
+name: "CI"
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref  }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: nalabelle/build/.github/workflows/ci.yaml@main
+    permissions:
+      contents: read
+      packages: write
+    with:
+      target: +test
+      cache: ghcr.io/nalabelle/cleaner:cache
+      release: false
