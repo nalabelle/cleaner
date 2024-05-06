@@ -6,7 +6,8 @@
     "github:NixOS/nixpkgs/nixos-unstable#toml-cli",
     "earthly@latest",
     "git@latest",
-    "jq@latest"
+    "jq@latest",
+    "convco@latest"
   ],
   "env": {
     "PROMPT_ENV": "devbox:cleaner"

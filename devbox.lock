@@ -1,6 +1,54 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "convco@latest": {
+      "last_modified": "2024-04-19T17:36:04-04:00",
+      "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#convco",
+      "source": "devbox-search",
+      "version": "0.5.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zil99v9m0psnidi9ki9xpjbikmc19bk7-convco-0.5.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zil99v9m0psnidi9ki9xpjbikmc19bk7-convco-0.5.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jy8kzfa34r8jxznamlmgdlaspv9qpcij-convco-0.5.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jy8kzfa34r8jxznamlmgdlaspv9qpcij-convco-0.5.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mgyw5sn4zf7mxw1im301yb6fyymbf5sp-convco-0.5.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mgyw5sn4zf7mxw1im301yb6fyymbf5sp-convco-0.5.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xgq0flcj5834s1r3dgi6nk1c17pkdsck-convco-0.5.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xgq0flcj5834s1r3dgi6nk1c17pkdsck-convco-0.5.1"
+        }
+      }
+    },
     "earthly@latest": {
       "last_modified": "2024-03-22T11:26:23Z",
       "resolved": "github:NixOS/nixpkgs/a3ed7406349a9335cb4c2a71369b697cecd9d351#earthly",
