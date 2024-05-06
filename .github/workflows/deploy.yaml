@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
+      - '.github/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Compile
+        id: compile_linux
+        uses: rust-build/rust-build.action@v1.4.5
+        with:
+          RUSTTARGET: x86_64-unknown-linux-musl
+          ARCHIVE_TYPES: tar.xz
+          UPLOAD_MODE: none
+
+      - name: Compile
+        id: compile_windows
+        uses: rust-build/rust-build.action@v1.4.5
+        with:
+          RUSTTARGET: x86_64-pc-windows-gnu
+          ARCHIVE_TYPES: zip
+          UPLOAD_MODE: none
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+
+      - name: Create Release
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          makeLatest: true
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "\
+            ${{ steps.compile_linux.outputs.BUILT_ARCHIVE }},\
+            ${{ steps.compile_linux.outputs.BUILT_CHECKSUM }},\
+            ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }},\
+            ${{ steps.compile_windows.outputs.BUILT_CHECKSUM }}"
+        if: ${{ steps.tag_version.outputs.new_tag != null }}
+
