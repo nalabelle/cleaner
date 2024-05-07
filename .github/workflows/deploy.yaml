@@ -19,6 +19,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+
       - name: Compile
         id: compile_linux
         uses: rust-build/rust-build.action@6febf1b0ed6499a46610b58ef9d810398e75f3c2 # v1.4.5
@@ -26,6 +33,7 @@ jobs:
           RUSTTARGET: x86_64-unknown-linux-musl
           ARCHIVE_TYPES: tar.xz
           UPLOAD_MODE: none
+        if: ${{ steps.tag_version.outputs.new_tag != null }}
 
       - name: Compile
         id: compile_windows
@@ -34,13 +42,7 @@ jobs:
           RUSTTARGET: x86_64-pc-windows-gnu
           ARCHIVE_TYPES: zip
           UPLOAD_MODE: none
-
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@a22cf08638b34d5badda920f9daf6e72c477b07b # v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
+        if: ${{ steps.tag_version.outputs.new_tag != null }}
 
       - name: Create Release
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
