@@ -4,7 +4,7 @@ ARG --global REGISTRY="ghcr.io"
 ARG --global PROJECT="nalabelle/cleaner"
 
 deps:
-  FROM docker.io/jetpackio/devbox:latest@sha256:23c87f02a93411b158da1740aa19d11cb524d59ac88ddd87c9b56db617acf2a7
+  FROM docker.io/jetpackio/devbox:latest@sha256:ee824b41a9293ad8f868479e28c064d2ed83142ae02b5c39d34696118099d994
   # Installing your devbox project
   WORKDIR /code
   USER root:root
