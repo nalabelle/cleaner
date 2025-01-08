@@ -9,7 +9,7 @@ clap = { version = "4.5.3", features = ["derive", "unicode"] }
 env_logger = "0.11.3"
 fundu = "2.0.0"
 log = "0.4.21"
-trash = "4.1.0"
+trash = "5.0.0"
 
 [dev-dependencies]
 
