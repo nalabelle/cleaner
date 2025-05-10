@@ -5,7 +5,7 @@
     "github:NixOS/nixpkgs/nixos-unstable#cargo-binstall",
     "github:NixOS/nixpkgs/nixos-unstable#toml-cli",
     "earthly@0.8.15",
-    "git@2.48.1",
+    "git@2.49.0",
     "jq@latest",
     "convco@0.6.1"
   ],
