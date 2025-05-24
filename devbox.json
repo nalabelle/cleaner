@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.10.3/.schema/devbox.schema.json",
   "packages": [
-    "rustup@1.27.1",
+    "rustup@1.28.2",
     "github:NixOS/nixpkgs/nixos-unstable#cargo-binstall",
     "github:NixOS/nixpkgs/nixos-unstable#toml-cli",
     "earthly@0.8.15",

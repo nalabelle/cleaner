@@ -301,52 +301,52 @@
         }
       }
     },
-    "rustup@1.27.1": {
-      "last_modified": "2025-05-06T08:06:31Z",
+    "rustup@1.28.2": {
+      "last_modified": "2025-05-19T23:16:24Z",
       "plugin_version": "0.0.1",
-      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#rustup",
+      "resolved": "github:NixOS/nixpkgs/359c442b7d1f6229c1dc978116d32d6c07fe8440#rustup",
       "source": "devbox-search",
-      "version": "1.27.1",
+      "version": "1.28.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/7drfmw0y8b2533qgjn7dffrcn6icnldj-rustup-1.27.1",
+              "path": "/nix/store/q28ngxpqpvv19bnj09b796mssh05p54n-rustup-1.28.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/7drfmw0y8b2533qgjn7dffrcn6icnldj-rustup-1.27.1"
+          "store_path": "/nix/store/q28ngxpqpvv19bnj09b796mssh05p54n-rustup-1.28.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/q8yyj6y1hayz657xx2csxnlb1i0g60kg-rustup-1.27.1",
+              "path": "/nix/store/ij4wk81b72lbvvd9frbykbkvi2h1jyv3-rustup-1.28.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/q8yyj6y1hayz657xx2csxnlb1i0g60kg-rustup-1.27.1"
+          "store_path": "/nix/store/ij4wk81b72lbvvd9frbykbkvi2h1jyv3-rustup-1.28.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/z5scd0g1ypbjnl2j5b2zsm6m6fm1pv3b-rustup-1.27.1",
+              "path": "/nix/store/3ybgkqizd7h1z3v1m1q3y8acs309c78n-rustup-1.28.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/z5scd0g1ypbjnl2j5b2zsm6m6fm1pv3b-rustup-1.27.1"
+          "store_path": "/nix/store/3ybgkqizd7h1z3v1m1q3y8acs309c78n-rustup-1.28.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fdgipbzshck7iqmv06jni83bwvqzdbbf-rustup-1.27.1",
+              "path": "/nix/store/pn2am20347wf3d3a0wxi8jkpwi55ccq9-rustup-1.28.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fdgipbzshck7iqmv06jni83bwvqzdbbf-rustup-1.27.1"
+          "store_path": "/nix/store/pn2am20347wf3d3a0wxi8jkpwi55ccq9-rustup-1.28.2"
         }
       }
     }
