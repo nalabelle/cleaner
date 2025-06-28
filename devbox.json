@@ -6,7 +6,7 @@
     "github:NixOS/nixpkgs/nixos-unstable#toml-cli",
     "earthly@0.8.15",
     "git@2.49.0",
-    "jq@latest",
+    "jq@1.8.0",
     "convco@0.6.1"
   ],
   "env": {
