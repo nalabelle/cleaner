@@ -5,21 +5,27 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - 'README.md'
-      - 'LICENSE'
-
-concurrency:
-  group: ci-${{ github.head_ref || github.ref  }}
-  cancel-in-progress: true
 
 jobs:
-  ci:
-    uses: nalabelle/build/.github/workflows/ci.yaml@main
-    permissions:
-      contents: read
-      packages: write
-    with:
-      target: +test
-      cache: ghcr.io/nalabelle/cleaner:cache
-      release: false
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - uses: pre-commit/action@v3.0.1

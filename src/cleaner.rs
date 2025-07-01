@@ -1,21 +1,20 @@
-use log;
 use std::fs;
 use std::io::Result;
 use std::path::{Path, PathBuf};
 use std::time;
-use trash;
+
+use log::{trace, warn};
 
 pub trait CleanerCondition {
     fn test(&self, path: PathBuf) -> bool;
-    fn display(&self) -> String;
 }
 
-pub fn print_path(path: &PathBuf) -> String {
+pub fn print_path(path: &Path) -> String {
     let formatted_path: &Path = match path.strip_prefix(".") {
         Ok(p) => p,
-        Err(_) => path.as_path(),
+        Err(_) => path,
     };
-    format!("{}", formatted_path.to_str().unwrap())
+    formatted_path.to_str().unwrap().to_string()
 }
 
 pub struct LastModifiedIsOlderThan {
@@ -25,14 +24,11 @@ pub struct LastModifiedIsOlderThan {
 
 impl LastModifiedIsOlderThan {
     pub fn new(duration: time::Duration, now: time::SystemTime) -> LastModifiedIsOlderThan {
-        log::trace!(
+        trace!(
             "Adding LastModifiedIsOlderThan condition for {:?}",
             duration
         );
-        LastModifiedIsOlderThan {
-            duration: duration,
-            now: now,
-        }
+        LastModifiedIsOlderThan { duration, now }
     }
 
     fn modified_duration(&self, path: &PathBuf) -> time::Duration {
@@ -42,13 +38,9 @@ impl LastModifiedIsOlderThan {
 }
 
 impl CleanerCondition for LastModifiedIsOlderThan {
-    fn display(&self) -> String {
-        format!("LastModifiedIsOlderThan {:?}", &self.duration)
-    }
-
     fn test(&self, path: PathBuf) -> bool {
         let modified = self.modified_duration(&path);
-        log::trace!(
+        trace!(
             "{}, File Time {:.0?} vs Comparison Time {:.0?}",
             print_path(&path),
             modified,
@@ -74,9 +66,9 @@ impl Cleaner {
         conditions: Vec<Box<dyn CleanerCondition>>,
     ) -> Cleaner {
         Cleaner {
-            path: path,
-            dry_run: dry_run,
-            conditions: conditions,
+            path,
+            dry_run,
+            conditions,
         }
     }
 
@@ -90,7 +82,7 @@ impl Cleaner {
                 let result = condition.test(path.clone());
                 let postfix = if self.dry_run { " (dry run)" } else { "" };
                 if result {
-                    log::warn!("Deleting {}{}", print_path(&path), postfix);
+                    warn!("Deleting {}{}", print_path(&path), postfix);
                     if !self.dry_run {
                         trash::delete(&path).unwrap();
                     }

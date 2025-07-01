@@ -1,10 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{command, Parser};
-use env_logger;
 use fundu::DurationParser;
 use fundu::TimeUnit::{Day, Hour, Minute};
-use log;
 use std::io::{Error, ErrorKind, Result};
 use std::time::{Duration, SystemTime};
 
@@ -43,17 +41,14 @@ fn main() -> Result<()> {
 
     let mut conditions: Vec<Box<dyn cleaner::CleanerCondition>> = Vec::new();
     let system_now = SystemTime::now();
-    match args.not_modified_within {
-        Some(value) => {
-            let condition = Box::new(cleaner::LastModifiedIsOlderThan::new(
-                parse_time(value),
-                system_now,
-            ));
-            conditions.push(condition);
-        }
-        None => {}
+    if let Some(value) = args.not_modified_within {
+        let condition = Box::new(cleaner::LastModifiedIsOlderThan::new(
+            parse_time(value),
+            system_now,
+        ));
+        conditions.push(condition);
     }
-    if conditions.len() < 1 {
+    if conditions.is_empty() {
         return Err(Error::new(
             ErrorKind::InvalidInput,
             "No conditions to check, please add some",

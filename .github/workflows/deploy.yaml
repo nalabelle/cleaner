@@ -60,4 +60,3 @@ jobs:
             ${{ steps.compile_windows.outputs.BUILT_ARCHIVE }},\
             ${{ steps.compile_windows.outputs.BUILT_CHECKSUM }}"
         if: ${{ steps.tag_version.outputs.new_tag != null }}
-
