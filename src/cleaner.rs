@@ -24,10 +24,7 @@ pub struct LastModifiedIsOlderThan {
 
 impl LastModifiedIsOlderThan {
     pub fn new(duration: time::Duration, now: time::SystemTime) -> LastModifiedIsOlderThan {
-        trace!(
-            "Adding LastModifiedIsOlderThan condition for {:?}",
-            duration
-        );
+        trace!("Adding LastModifiedIsOlderThan condition for {duration:?}");
         LastModifiedIsOlderThan { duration, now }
     }
 
