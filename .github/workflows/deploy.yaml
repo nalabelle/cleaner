@@ -26,22 +26,53 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: false
 
-      - name: Compile
-        id: compile_linux
-        uses: rust-build/rust-build.action@6febf1b0ed6499a46610b58ef9d810398e75f3c2 # v1.4.5
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          RUSTTARGET: x86_64-unknown-linux-musl
-          ARCHIVE_TYPES: tar.xz
-          UPLOAD_MODE: none
+          targets: x86_64-unknown-linux-musl,x86_64-pc-windows-gnu
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install cross-compilation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools mingw-w64
         if: ${{ steps.tag_version.outputs.new_tag != null }}
 
-      - name: Compile
+      - name: Build Linux binary
+        id: compile_linux
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
+          mkdir -p dist
+          cp target/x86_64-unknown-linux-musl/release/cleaner dist/cleaner-linux-x64
+          cd dist
+          tar -cJf cleaner-linux-x64.tar.xz cleaner-linux-x64
+          sha256sum cleaner-linux-x64.tar.xz > cleaner-linux-x64.tar.xz.sha256
+          echo "BUILT_ARCHIVE=$(pwd)/cleaner-linux-x64.tar.xz" >> $GITHUB_OUTPUT
+          echo "BUILT_CHECKSUM=$(pwd)/cleaner-linux-x64.tar.xz.sha256" >> $GITHUB_OUTPUT
+        if: ${{ steps.tag_version.outputs.new_tag != null }}
+
+      - name: Build Windows binary
         id: compile_windows
-        uses: rust-build/rust-build.action@6febf1b0ed6499a46610b58ef9d810398e75f3c2 # v1.4.5
-        with:
-          RUSTTARGET: x86_64-pc-windows-gnu
-          ARCHIVE_TYPES: zip
-          UPLOAD_MODE: none
+        run: |
+          cargo build --release --target x86_64-pc-windows-gnu
+          mkdir -p dist
+          cp target/x86_64-pc-windows-gnu/release/cleaner.exe dist/cleaner-windows-x64.exe
+          cd dist
+          zip cleaner-windows-x64.zip cleaner-windows-x64.exe
+          sha256sum cleaner-windows-x64.zip > cleaner-windows-x64.zip.sha256
+          echo "BUILT_ARCHIVE=$(pwd)/cleaner-windows-x64.zip" >> $GITHUB_OUTPUT
+          echo "BUILT_CHECKSUM=$(pwd)/cleaner-windows-x64.zip.sha256" >> $GITHUB_OUTPUT
         if: ${{ steps.tag_version.outputs.new_tag != null }}
 
       - name: Create Release
