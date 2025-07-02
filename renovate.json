@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>nalabelle/renovate-config:auto.json5"
+      "github>nalabelle/dotfiles//git/renovate/default.json5"
   ]
 }
