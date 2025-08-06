@@ -26,6 +26,36 @@ pub fn print_path(path: &Path) -> String {
         .to_string()
 }
 
+/// Filter that determines if a file should be excluded from deletion
+pub struct ExclusionFilter {
+    patterns: Vec<String>,
+}
+
+impl ExclusionFilter {
+    /// Create a new ExclusionFilter with the given patterns
+    pub fn new(patterns: Vec<String>) -> Self {
+        ExclusionFilter { patterns }
+    }
+
+    /// Check if a file should be excluded from deletion
+    pub fn should_exclude(&self, path: &Path) -> bool {
+        if let Some(file_name) = path.file_name() {
+            if let Some(file_name_str) = file_name.to_str() {
+                return self.patterns.iter().any(|pattern| file_name_str == pattern);
+            }
+        }
+        false
+    }
+}
+
+/// Default file patterns to exclude from deletion
+pub const DEFAULT_EXCLUSIONS: &[&str] = &[
+    ".DS_Store",   // macOS
+    "Thumbs.db",   // Windows
+    "desktop.ini", // Windows
+    ".directory",  // KDE
+];
+
 pub struct LastModifiedIsOlderThan {
     duration: time::Duration,
     now: time::SystemTime,
@@ -84,6 +114,7 @@ pub struct Cleaner {
     path: PathBuf,
     dry_run: bool,
     conditions: Vec<Box<dyn CleanerCondition>>,
+    exclusion_filter: ExclusionFilter,
     trash_ctx: trash::TrashContext,
 }
 
@@ -92,6 +123,7 @@ impl Cleaner {
         path: PathBuf,
         dry_run: bool,
         conditions: Vec<Box<dyn CleanerCondition>>,
+        exclusion_filter: ExclusionFilter,
     ) -> Cleaner {
         let mut trash_ctx = trash::TrashContext::new();
 
@@ -103,6 +135,7 @@ impl Cleaner {
             path,
             dry_run,
             conditions,
+            exclusion_filter,
             trash_ctx,
         }
     }
@@ -113,6 +146,13 @@ impl Cleaner {
         for entry in entries {
             let entry = entry?;
             let path = entry.path();
+
+            // Skip excluded files
+            if self.exclusion_filter.should_exclude(path.as_path()) {
+                trace!("Skipping excluded file: {}", print_path(&path));
+                continue;
+            }
+
             for condition in conditions.iter() {
                 let result = condition.test(path.clone());
                 let postfix = if self.dry_run { " (dry run)" } else { "" };
@@ -123,6 +163,7 @@ impl Cleaner {
                             panic!("Failed to move to trash '{}': {}", print_path(&path), e)
                         });
                     }
+                    break; // File will be deleted, no need to check other conditions
                 }
             }
         }
@@ -229,10 +270,75 @@ mod tests {
             StdDuration::from_secs(24 * 60 * 60),
             now,
         ));
-        let cleaner = Cleaner::new(dir.path().to_path_buf(), true, vec![cond]); // dry-run
+        let exclusion_filter = ExclusionFilter::new(vec![]);
+        let cleaner = Cleaner::new(dir.path().to_path_buf(), true, vec![cond], exclusion_filter); // dry-run
 
         // Should not panic and not actually delete the file in dry-run
         cleaner.clean().unwrap();
         assert!(file_path.exists());
+    }
+
+    // =======================
+    // ExclusionFilter tests
+    // =======================
+
+    #[test]
+    fn test_exclusion_filter_default_patterns() {
+        let filter =
+            ExclusionFilter::new(DEFAULT_EXCLUSIONS.iter().map(|s| s.to_string()).collect());
+
+        // Test .DS_Store exclusion
+        let ds_store = PathBuf::from("/some/path/.DS_Store");
+        assert!(filter.should_exclude(&ds_store));
+
+        // Test Thumbs.db exclusion
+        let thumbs_db = PathBuf::from("/some/path/Thumbs.db");
+        assert!(filter.should_exclude(&thumbs_db));
+
+        // Test non-excluded file
+        let normal_file = PathBuf::from("/some/path/normal.txt");
+        assert!(!filter.should_exclude(&normal_file));
+    }
+
+    #[test]
+    fn test_exclusion_filter_custom_patterns() {
+        let patterns = vec!["custom.file".to_string(), "special.txt".to_string()];
+        let filter = ExclusionFilter::new(patterns);
+
+        assert!(filter.should_exclude(&PathBuf::from("/path/custom.file")));
+        assert!(filter.should_exclude(&PathBuf::from("/path/special.txt")));
+        assert!(!filter.should_exclude(&PathBuf::from("/path/normal.txt")));
+    }
+
+    #[test]
+    fn test_exclusion_filter_empty_patterns() {
+        let filter = ExclusionFilter::new(vec![]);
+
+        assert!(!filter.should_exclude(&PathBuf::from("/path/.DS_Store")));
+        assert!(!filter.should_exclude(&PathBuf::from("/path/any.file")));
+    }
+
+    #[test]
+    fn test_exclusion_filter_non_matching_files() {
+        // Ensure non-matching names are not excluded
+        let filter = ExclusionFilter::new(vec!["node_modules".to_string(), "target".to_string()]);
+        assert!(!filter.should_exclude(&PathBuf::from("/path/file.txt")));
+        assert!(!filter.should_exclude(&PathBuf::from("/path/subdir/another.rs")));
+        assert!(!filter.should_exclude(&PathBuf::from("/path/.hidden")));
+    }
+
+    #[test]
+    fn test_exclusion_filter_invalid_paths() {
+        let filter = ExclusionFilter::new(vec![".DS_Store".to_string()]);
+
+        // Test with invalid UTF-8 filename surrogate replacement char; as OsStr -> str may fail,
+        // our implementation falls back to false if file_name can't become &str
+        let invalid_path = PathBuf::from("/path/\u{FFFD}");
+        assert!(!filter.should_exclude(&invalid_path));
+
+        // Test with directory-like path (file_name() will be Some(""), or None if ends with slash logic);
+        // In either case, should not match and thus not exclude
+        let dir_path = PathBuf::from("/path/");
+        assert!(!filter.should_exclude(&dir_path));
     }
 }

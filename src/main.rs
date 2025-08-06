@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{command, Parser};
+use clap::{Parser, command};
 use fundu::DurationParser;
 use fundu::TimeUnit::{Day, Hour, Minute};
 use std::io::{Error, ErrorKind, Result};
@@ -22,6 +22,14 @@ pub struct Args {
     /// Duration to consider files for deletion, ex: 7d
     #[arg(short, long)]
     not_modified_within: Option<String>,
+
+    /// Files to exclude from deletion (can be specified multiple times)
+    #[arg(short, long)]
+    exclude: Vec<String>,
+
+    /// Disable default exclusions (.DS_Store, Thumbs.db, etc.)
+    #[arg(long)]
+    no_default_exclusions: bool,
 }
 
 const PARSER: DurationParser = DurationParser::builder()
@@ -54,7 +62,21 @@ fn main() -> Result<()> {
             "No conditions to check, please add some",
         ));
     }
-    let cleaner = cleaner::Cleaner::new(args.path, args.dry_run, conditions);
+
+    // Build the exclusion filter
+    let mut exclusion_patterns = Vec::new();
+
+    // Add default exclusions unless disabled
+    if !args.no_default_exclusions {
+        exclusion_patterns.extend(cleaner::DEFAULT_EXCLUSIONS.iter().map(|s| s.to_string()));
+    }
+
+    // Add user-specified exclusions
+    exclusion_patterns.extend(args.exclude);
+
+    let exclusion_filter = cleaner::ExclusionFilter::new(exclusion_patterns);
+
+    let cleaner = cleaner::Cleaner::new(args.path, args.dry_run, conditions, exclusion_filter);
     cleaner.clean()?;
     Ok(())
 }
