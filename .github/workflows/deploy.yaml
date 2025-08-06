@@ -84,8 +84,7 @@ jobs:
           mkdir -p dist
           cp target/x86_64-unknown-linux-musl/release/cleaner dist/cleaner-linux-x64
           cd dist
-          tar -cJf cleaner-linux-x64.tar.xz cleaner-linux-x64
-          sha256sum cleaner-linux-x64.tar.xz > cleaner-linux-x64.tar.xz.sha256
+          sha256sum cleaner-linux-x64 > cleaner-linux-x64.sha256
 
       - name: Build Windows binary
         run: |
@@ -93,18 +92,17 @@ jobs:
           mkdir -p dist
           cp target/x86_64-pc-windows-gnu/release/cleaner.exe dist/cleaner-windows-x64.exe
           cd dist
-          zip cleaner-windows-x64.zip cleaner-windows-x64.exe
-          sha256sum cleaner-windows-x64.zip > cleaner-windows-x64.zip.sha256
+          sha256sum cleaner-windows-x64.exe > cleaner-windows-x64.exe.sha256
 
       - name: Upload Ubuntu artifacts
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: ubuntu-artifacts
           path: |
-            dist/cleaner-linux-x64.tar.xz
-            dist/cleaner-linux-x64.tar.xz.sha256
-            dist/cleaner-windows-x64.zip
-            dist/cleaner-windows-x64.zip.sha256
+            dist/cleaner-linux-x64
+            dist/cleaner-linux-x64.sha256
+            dist/cleaner-windows-x64.exe
+            dist/cleaner-windows-x64.exe.sha256
 
   build_macos:
     name: Build macOS (Apple Silicon)
@@ -138,16 +136,15 @@ jobs:
           mkdir -p dist
           cp target/aarch64-apple-darwin/release/cleaner dist/cleaner-macos-arm64
           cd dist
-          zip cleaner-macos-arm64.zip cleaner-macos-arm64
-          shasum -a 256 cleaner-macos-arm64.zip > cleaner-macos-arm64.zip.sha256
+          shasum -a 256 cleaner-macos-arm64 > cleaner-macos-arm64.sha256
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: macos-artifacts
           path: |
-            dist/cleaner-macos-arm64.zip
-            dist/cleaner-macos-arm64.zip.sha256
+            dist/cleaner-macos-arm64
+            dist/cleaner-macos-arm64.sha256
 
   release:
     name: Create GitHub Release
