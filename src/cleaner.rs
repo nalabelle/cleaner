@@ -5,6 +5,9 @@ use std::time;
 
 use log::{trace, warn};
 
+#[cfg(target_os = "macos")]
+use trash::macos::{DeleteMethod, TrashContextExtMacos};
+
 #[cfg(test)]
 use std::time::{Duration as StdDuration, SystemTime};
 
@@ -81,6 +84,7 @@ pub struct Cleaner {
     path: PathBuf,
     dry_run: bool,
     conditions: Vec<Box<dyn CleanerCondition>>,
+    trash_ctx: trash::TrashContext,
 }
 
 impl Cleaner {
